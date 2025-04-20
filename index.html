@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Multi-Audio Player</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+
+</head>
+
+<body>
+
+    <div class="player-container">
+        <div class="theme-selector">
+            <button class="theme-toggle">🎨 Theme</button>
+            <div class="theme-menu">
+                <div data-theme="neon" class="theme-option">Neon Blue</div>
+                <div data-theme="purple" class="theme-option">Soft Purple</div>
+                <div data-theme="amber" class="theme-option">Warm Amber</div>
+                <div data-theme="blue" class="theme-option">Blue Amber</div>
+                <div data-theme="green" class="theme-option">Green Amber</div>
+            </div>
+        </div>
+        <h2>Memorize - Audio Player</h2>
+
+
+        <div class="custom-file">
+            <label class="custom-file-label">📁 Choose Files or Drop Files/Folder
+                <input type="file" id="fileInput" multiple accept="audio/*">
+            </label>
+        </div>
+        <div class="controls">
+            <button onclick="prev()">⏮ Prev</button>
+            <button onclick="playPause()">▶️/⏸ Play/Pause</button>
+            <button onclick="stop()">⏹ Stop</button>
+            <button onclick="next()">⏭ Next</button>
+        </div>
+        <ul id="playlist" class="droppable"></ul>
+        <div class="trackAudio">
+            <audio id="audio" controls></audio>
+            <button id="repeatBtn" onclick="toggleRepeat()">🔁 Repeat</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px; margin-top: 10px;">
+            <label for="speedSlider" style="color: #00ffe7; font-weight: bold;">Speed:</label>
+            <input type="range" id="speedSlider" min="0.5" max="2" step="0.05" value="1"
+                style="width: 120px;  margin-top: 7px;">
+            <span id="speedLabel" style="color: #00ffe7; font-weight: bold; margin-left: -12px;">1.00x</span>
+        </div>
+        <div class="number-grid">
+            <!-- JS can populate this later if needed -->
+            <input type="number" value="10">
+            <input type="number" value="">
+            <input type="number" value="">
+            <input type="number" value="">
+            <input type="number" value="500">
+            <input type="number" value="">
+            <!-- ...as many as you want -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

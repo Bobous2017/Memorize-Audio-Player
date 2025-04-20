@@ -1,0 +1,330 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0f0f0f;
+    margin: 0;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    color: #eee;
+}
+
+.player-container {
+    background: #121212;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+h2 {
+    margin-top: 0;
+    color: #00ffe7;
+    text-shadow: 0 0 8px #00ffe7;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.controls button {
+    flex: 1;
+    min-width: 100px;
+    margin: 5px;
+    padding: 10px;
+    background-color: #0f0f0f;
+    border: none;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+    transition: background-color 0.2s, box-shadow 0.3s ease;
+}
+
+.controls button:hover {
+    background-color: #0097a7;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+}
+
+ul#playlist {
+    list-style: none;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border: 1px solid #00ffe7;
+    border-radius: 8px;
+    background: #1c1c1c;
+}
+
+ul#playlist li {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s;
+    color: #ccc;
+}
+
+ul#playlist li:hover {
+    background: #262626;
+    color: #00e5ff;
+}
+
+ul#playlist li.active {
+    font-weight: bold;
+    color: #00ff88;
+    background: #002b20;
+    text-shadow: 0 0 6px #00ff88;
+}
+
+audio {
+    width: 100%;
+
+    filter: drop-shadow(0 0 5px #00ffe7);
+}
+
+/* Fancy File Input */
+.custom-file {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.custom-file input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+}
+
+.custom-file-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #0f0f0f;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 0 10px #0f0f0f;
+    transition: background-color 0.2s ease, box-shadow 0.3s;
+}
+
+.custom-file-label:hover {
+    background-color: #0097a7;
+    box-shadow: 0 0 15px #00e5ff;
+}
+
+.trackAudio {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+    background: #111;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 0 12px #00ffe7;
+}
+
+.trackAudio audio {
+    flex: 1;
+    max-width: 100%;
+    filter: drop-shadow(0 0 6px #00ffe7);
+    border-radius: 18px;
+    background-color: #00ffcc;
+    height: 38px;
+}
+
+#repeatBtn {
+    height: 40px;
+    padding: 0 15px;
+    background: #111;
+    border: 1px solid #00ffe7;
+    color: #00ffe7;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 8px #00ffe7;
+    transition: 0.2s;
+}
+
+#repeatBtn:hover {
+    background: #00ffe7;
+    color: #000;
+}
+
+#repeatBtn.active {
+    background-color: #00ffcc;
+    color: black;
+    box-shadow: 0 0 12px #00ffe7;
+}
+
+.droppable.dragover {
+    border: 2px dashed #00ffe7;
+    background-color: rgba(0, 255, 255, 0.05);
+}
+
+#playlist li:hover {
+    outline: 2px dashed #00ffe7;
+    cursor: ns-resize;
+}
+
+#speedSlider {
+    accent-color: #00ffe7;
+    margin-top: 10px;
+}
+
+#speedLabel {
+    accent-color: #00ffe7;
+    min-width: 60px;
+    display: inline-block;
+    text-align: center;
+}
+
+.number-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    /* 10 columns */
+    gap: 5px;
+    margin-top: 20px;
+    padding: 10px;
+    background: #111;
+    border: 1px solid #00ffe7;
+    border-radius: 12px;
+}
+
+.number-grid input[type="number"] {
+    width: 100%;
+    /* padding: 6px; */
+    background: #222;
+    color: #00ffcc;
+    font-weight: bold;
+    border: 1px solid #00ffe7;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* highlighting the grid cell */
+.number-grid input.highlighted {
+    background-color: #00ffe7;
+    color: #000;
+    box-shadow: 0 0 12px #00ffe7;
+    font-weight: bold;
+}
+
+/* Theme Styles */
+:root {
+    --glow-color: #00ffe7;
+    --bg-color: #121212;
+}
+
+.theme-purple {
+    --glow-color: #c084fc;
+    --bg-color: #1a1a2e;
+}
+
+.theme-amber {
+    --glow-color: #ffb347;
+    --bg-color: #2b1d0e;
+}
+
+.theme-blue {
+    --glow-color: #3b82f6;
+    /* --bg-color: #1e3a8a; */
+}
+
+.theme-green {
+    --glow-color: #34d399;
+    /* --bg-color: #064e3b; */
+}
+
+
+.player-container.theme-blueDefault {
+    --glow-color: #3b82f6;
+    --bg-color: #1a1a2e;
+}
+
+
+/* etc. */
+.player-container {
+    background: var(--bg-color);
+    box-shadow: 0 0 20px var(--glow-color);
+}
+
+.controls button {
+    box-shadow: 0 0 8px var(--glow-color);
+}
+
+#repeatBtn.active {
+    background-color: var(--glow-color);
+    color: black;
+}
+
+.theme-selector {
+    position: relative;
+    display: inline-block;
+}
+
+.theme-toggle {
+    background: #111;
+    color: #0ff;
+    border: 1px solid #0ff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #0ff;
+}
+
+.theme-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #222;
+    border: 1px solid #0ff;
+    border-radius: 6px;
+    display: none;
+    z-index: 10;
+}
+
+.theme-option {
+    padding: 8px 12px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.theme-option:hover {
+    background: #0ff;
+    color: #000;
+}
+
+.theme-selector.open .theme-menu {
+    display: block;
+}
+
+input[type="checkbox"] {
+    display: inline-block;
+    transform: scale(1.2);
+    margin-right: 8px;
+}
+
+.track-checkbox {
+    accent-color: var(--glow-color);
+    filter: drop-shadow(0 0 5px var(--glow-color));
+}
+
+@media (max-width: 580px) {
+    .player-container {
+        padding: 20px 15px;
+        width: 580px;
+    }
+}
