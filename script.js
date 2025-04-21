@@ -6,11 +6,11 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-
 let files = [];
 let currentIndex = 0;
 let activeIndexes = [];
 const repeatMap = {}; // { 2: 3, 4: 1, ... }
+const trimMap = {}; // e.g., { 0: { start: 2.5, end: 5.0 }, 2: { start: 0, end: 4.3 } }✅ Step 1: Track start & end positions
 
 const audio = document.getElementById('audio');
 const fileInput = document.getElementById('fileInput');
@@ -19,12 +19,10 @@ const playlist = document.getElementById('playlist');
 let isRepeating = false;
 const repeatBtn = document.getElementById("repeatBtn");
 
-
 const speedSlider = document.getElementById('speedSlider');
 const speedLabel = document.getElementById('speedLabel');
-
-
-
+let isLooping = false;
+const loopBtn = document.getElementById("loopBtn");
 
 // Update speed when the slider changes
 speedSlider.addEventListener('input', () => {
@@ -32,7 +30,6 @@ speedSlider.addEventListener('input', () => {
     audio.playbackRate = rate;
     speedLabel.textContent = `${rate.toFixed(2)}x`;
 });
-
 
 //A repeat counter
 let repeatCount = 0;
@@ -67,16 +64,6 @@ function updatePlaylist() {
     playlist.innerHTML = '';
     files.forEach((file, index) => {
         const li = document.createElement('li');
-        // li.textContent = file.name;
-        // li.onclick = () => loadTrack(index);
-        // //if (index === currentIndex) li.classList.add('active');
-        // if (index === currentIndex) {
-        //     li.classList.add('active');
-        //     if (isRepeating && repeatCount > 1) {
-        //         li.textContent += `  🔁 x${repeatCount}`;
-        //     }
-        // }
-        // playlist.appendChild(li);
         if (index === currentIndex) {
             li.classList.add('active');
 
@@ -87,16 +74,13 @@ function updatePlaylist() {
 
             li.appendChild(countSpan);
         }
-
         // Create checkbox
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.classList.add('track-checkbox');
         checkbox.dataset.index = index;
-
         // If it's already selected, keep it checked
         checkbox.checked = activeIndexes.includes(index);
-
         // Update activeIndexes when clicked
         checkbox.onchange = () => {
             const idx = parseInt(checkbox.dataset.index);
@@ -106,7 +90,6 @@ function updatePlaylist() {
                 activeIndexes = activeIndexes.filter(i => i !== idx);
             }
         };
-
         const span = document.createElement('span');
         span.textContent = file.name;
 
@@ -118,25 +101,119 @@ function updatePlaylist() {
             li.appendChild(countSpan);
         }
 
+        //✅ Step 2: Render trim sliders in updatePlaylist()
+        const trimContainer = document.createElement('div');
+        trimContainer.classList.add('trim-container');
+
+
+        const startSlider = document.createElement('input');
+        startSlider.type = 'range';
+        startSlider.min = 0;
+        startSlider.max = audio.duration || 10; // update dynamically
+        startSlider.step = 0.1;
+        startSlider.value = trimMap[index]?.start || 0;
+
+        const endSlider = document.createElement('input');
+        endSlider.type = 'range';
+        endSlider.min = 0;
+        endSlider.max = audio.duration || 10; // update dynamically
+        endSlider.step = 0.1;
+        endSlider.value = trimMap[index]?.end || 10;
+
+        // Store updated values
+        // Left slider for start time
+        let seekAfterSlider = false;
+
+        startSlider.oninput = () => {
+            trimMap[index] = trimMap[index] || {};
+            const newStart = parseFloat(startSlider.value);
+            const currentEnd = trimMap[index]?.end || audio.duration;
+
+            // Keep at least 0.5s difference between start and end
+            if (newStart >= currentEnd) {
+                trimMap[index].start = Math.max(0, currentEnd - 0.5);
+                startSlider.value = trimMap[index].start;
+            } else {
+                trimMap[index].start = newStart;
+            }
+
+            // Flag to seek after input is done
+            if (index === currentIndex) {
+                seekAfterSlider = true;
+            }
+        };
+        // When user releases the slider (finished dragging), then seek
+        startSlider.onchange = () => {
+            if (seekAfterSlider && index === currentIndex) {
+                audio.currentTime = trimMap[index].start;
+                seekAfterSlider = false;
+            }
+        };
+        // Right slider for Ending time
+        endSlider.oninput = () => {
+            trimMap[index] = trimMap[index] || {};
+            trimMap[index].end = parseFloat(endSlider.value);
+        };
+
+        trimContainer.appendChild(startSlider);
+        trimContainer.appendChild(endSlider);
+        li.appendChild(trimContainer);
 
         li.appendChild(checkbox);
         li.appendChild(span);
+        li.addEventListener('click', (e) => {
+            // Ignore click if it's on a slider or checkbox
+            if (e.target.tagName === 'INPUT') return;
+
+            loadTrack(index);
+        });
         playlist.appendChild(li);
     });
 }
-
 function loadTrack(index) {
     if (files[index]) {
         currentIndex = index;
         const fileURL = URL.createObjectURL(files[index]);
         audio.src = fileURL;
-        audio.playbackRate = parseFloat(speedSlider.value); // <-- Apply current speed
-        audio.play();
-        updatePlaylist();
-        resetRepeatCounter(); // clear when changing tracks
+        audio.playbackRate = parseFloat(speedSlider.value);
 
+        // ✅ Step 3: Use audio.currentTime to trim during playback
+        // ✅ Step 4: Bonus: Adjust sliders’ max value to match audio duration
+        audio.onloadedmetadata = () => {
+            const duration = audio.duration;
+            const trim = trimMap[currentIndex] || {};
+
+            // fallback if trim not yet set
+            if (!trim.start) trim.start = 0;
+            if (!trim.end) trim.end = duration;
+
+            trimMap[currentIndex] = trim;
+            audio.currentTime = trim.start;
+
+            updatePlaylist(); // only after we know duration
+            audio.play();     // play after setting trim
+        };
+
+        resetRepeatCounter();
     }
 }
+
+//* Add event listeners
+audio.addEventListener('timeupdate', () => {
+    const trim = trimMap[currentIndex];
+    if (!trim) return;
+
+    if (audio.currentTime < trim.start) {
+        audio.currentTime = trim.start;
+        return;
+    }
+
+    if (audio.currentTime >= trim.end) {
+        audio.pause();
+        audio.dispatchEvent(new Event('ended')); // loop or next
+    }
+});
+
 
 function playPause() {
     if (!files.length) return;
@@ -153,9 +230,7 @@ function stop() {
 }
 
 function next() {
-    // if (currentIndex < files.length - 1) {
-    //     loadTrack(currentIndex + 1);
-    // }
+
     if (activeIndexes.length > 0) {
         const currentInActive = activeIndexes.indexOf(currentIndex);
         const nextIndex = activeIndexes[(currentInActive + 1) % activeIndexes.length];
@@ -163,7 +238,24 @@ function next() {
     } else if (currentIndex < files.length - 1) {
         loadTrack(currentIndex + 1);
     }
+    // const currentInActive = activeIndexes.indexOf(currentIndex);
+
+    // let nextIndex;
+    // if (currentInActive === -1 || currentInActive === activeIndexes.length - 1) {
+    //     // Restart from first active item
+    //     nextIndex = activeIndexes[0];
+    // } else {
+    //     nextIndex = activeIndexes[currentInActive + 1];
+    // }
+
+    // loadTrack(nextIndex);
 }
+// Track the loop state
+loopBtn.onclick = () => {
+    isLooping = !isLooping;
+    loopBtn.classList.toggle("active", isLooping);
+    loopBtn.textContent = isLooping ? "🔂 Looping" : "🔂 Loop";
+};
 
 function prev() {
     if (currentIndex > 0) {
@@ -172,24 +264,6 @@ function prev() {
 }
 
 audio.addEventListener('ended', () => {
-    // if (isRepeating) {
-    //     audio.currentTime = 0;
-    //     audio.play();
-    //     repeatCount++;
-    //     highlightGridCells(repeatCount); // Highlight cells based on repeatCount
-    //     repeatDisplay.textContent = `🔁 x${repeatCount}`;
-    //     if (activeIndexes.length > 1) {
-    //         next(); // go to next active track
-    //     } else {
-    //         audio.currentTime = 0; // just repeat the single track
-    //         audio.play();
-    //     }
-    //     updatePlaylist(); // refresh playlist to show updated count
-
-    // } else {
-    //     resetRepeatCounter();
-    //     next();
-    // }
     if (isRepeating) {
         // Track-based repeat counter
         repeatMap[currentIndex] = (repeatMap[currentIndex] || 1) + 1;
@@ -211,7 +285,18 @@ audio.addEventListener('ended', () => {
 
     } else {
         resetRepeatCounter();
-        next();
+        //next();
+        const isLastTrack =
+            (activeIndexes.length > 0 && currentIndex === activeIndexes[activeIndexes.length - 1]) ||
+            (activeIndexes.length === 0 && currentIndex === files.length - 1);
+
+        if (isLastTrack && isLooping) {
+            // Go back to first item
+            const firstIndex = activeIndexes.length > 0 ? activeIndexes[0] : 0;
+            loadTrack(firstIndex);
+        } else {
+            next();
+        }
     }
 
 });
@@ -333,7 +418,6 @@ function highlightGridCells(repeatCount) {
         }
     });
 }
-
 
 document.querySelector('.theme-toggle').onclick = () => {
     document.querySelector('.theme-selector').classList.toggle('open');
