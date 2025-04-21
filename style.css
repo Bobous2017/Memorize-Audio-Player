@@ -328,3 +328,50 @@ input[type="checkbox"] {
         width: 580px;
     }
 }
+
+/* Responsive styles for smaller screens */
+.trim-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    padding: 4px 0;
+}
+
+.trim-container input[type="range"] {
+    flex: 1;
+    appearance: none;
+    height: 4px;
+    background: #0ff;
+    border-radius: 4px;
+    outline: none;
+    transition: background 0.3s ease;
+}
+
+.trim-container input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #0ff;
+    cursor: pointer;
+    margin-top: -4px;
+    box-shadow: 0 0 4px #0ff;
+}
+
+li.active .trim-container input[type="range"] {
+    background: #00ff88;
+}
+
+li.active .trim-container input[type="range"]::-webkit-slider-thumb {
+    border-color: #00ff88;
+    box-shadow: 0 0 5px #00ff88;
+}
+
+#loopBtn.active {
+    background-color: var(--glow-color);
+    color: black;
+}
